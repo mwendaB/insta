@@ -4,3 +4,8 @@ from .models import *
 
 
 # Create your views here.
+@login_required(login_url='/accounts/login/')
+def home(request):
+    posts = Post.objects.all()
+    return render(request, 'index.html', {'posts': posts})
+
