@@ -19,6 +19,13 @@ class Post(models.Model):
 
     class Meta:
         ordering = ['-posted_on']
+    
 
+    @classmethod
+    def get_images_by_user(cls, user):
+        posts = cls.objects.filter(user=user)
+        return posts
+    def delete_image(self):
+        self.delete()
 
 
