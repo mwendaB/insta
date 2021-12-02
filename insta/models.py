@@ -39,5 +39,11 @@ class Post(models.Model):
         self.image_caption = new_caption
         self.save()
 
+    @classmethod
+    def search_by_image_name(cls, search_term):
+        posts = cls.objects.filter(
+            image_name__icontains=search_term)
+        return posts
+
 
 
