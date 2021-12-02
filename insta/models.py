@@ -34,6 +34,10 @@ class Post(models.Model):
 
     def save_image(self):
         self.save()
+    
+    def update_caption(self, new_caption):
+        self.image_caption = new_caption
+        self.save()
 
 
 
