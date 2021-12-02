@@ -27,5 +27,13 @@ class Post(models.Model):
         return posts
     def delete_image(self):
         self.delete()
+    
+    @classmethod
+    def get_all_comments(self):
+        return self.objects.comments.all()
+
+    def save_image(self):
+        self.save()
+
 
 
