@@ -45,5 +45,6 @@ class Post(models.Model):
             image_name__icontains=search_term)
         return posts
 
-
+    def __str__(self):
+        return self.image_name
 
