@@ -16,3 +16,9 @@ class Post(models.Model):
     likes = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
 
+
+    class Meta:
+        ordering = ['-posted_on']
+
+
+
