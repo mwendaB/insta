@@ -48,3 +48,10 @@ class Post(models.Model):
     def __str__(self):
         return self.image_name
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # profile_photo = models.ImageField(upload_to='accounts/profile_photos', default=None)
+    profile_photo=CloudinaryField('image')
+    bio = models.TextField(max_length=500, blank=True, null=True)
+    contact = models.CharField(max_length=50, blank=True, null=True)
+
