@@ -55,3 +55,21 @@ class Profile(models.Model):
     bio = models.TextField(max_length=500, blank=True, null=True)
     contact = models.CharField(max_length=50, blank=True, null=True)
 
+    def update(self):
+        self.save()
+
+    def save_profile(self):
+        self.save()
+
+    def delete_profile(self):
+        self.delete()
+
+    @classmethod
+    def get_profile_by_user(cls, user):
+        profile = cls.objects.filter(user=user)
+        return profile
+
+    def __str__(self):
+        return self.user.username
+
+
