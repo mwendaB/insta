@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+    .card {
+        background: #fff none repeat scroll 0 0;
+        border: 1px solid rgb(255, 255, 255);
+        border-radius: 1px;
+        box-shadow: 0 0 11px 5px rgb(103 58 183 / 10%);
+        margin-bottom: 1px;
+        padding: 1px 1px;
+        transition: all 300ms ease-in-out;
+        -webkit-transition: all 300ms ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 0 11px 5px rgba(70, 41, 121, 0.25);
+        background: linear-gradient(-19deg, rgba(235, 174, 8, 0.95) 0px);
+    }
+
+    .profile .card-img-top {
+        border-radius: 50% !important;
+    }
+</style>
 <section class="profile container">
     <div class=" mt-5">
         <div class="row">
