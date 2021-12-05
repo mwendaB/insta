@@ -1,0 +1,16 @@
+{% extends "django_registration/base.html" %}
+{% load bootstrap4 %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1 class="display-3">Hello!</h1>
+            <p class="lead">Welcome to <strong>Ingram</strong>. Giving meaning to "A photo is worth a thousand words."</p>
+            <hr class="my-2">
+            <p>Share, Like, Comment</p>
+            <p class="lead">
+              <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+            </p>
+          </div>    
+    </div>
+{% endblock%}

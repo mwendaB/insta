@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/image_upload.css' %}">
+{% endblock %}
+
+{% block content %}
+    {{block.super}}
+    <div class="container">
+        {% if user.is_authenticated %}
+            <form action="{% url 'image_upload' user.id %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% bootstrap_form ImageUploadForm %}
+                <div class="form-group text-center">
+                    <input type="submit" value="Upload Image" class="btn btn-outline-primary">
+                </div>
+            </form>
+        {% else %}
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                    <h1 class="display-3">Login To Upload Image</h1>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "registration/base.html" %}
+{% load bootstrap4 %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-3">Logged Out!</h1>
+                <p class="lead">Click <a href="{% url 'login' %}">Here</a> to login!</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

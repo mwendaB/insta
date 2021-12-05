@@ -1,113 +1,99 @@
 from django.shortcuts import render, redirect
-from .forms import ProfileForm,ImageForm, CommentForm
+from django.http import HttpResponse, Http404
+from .models import Image, Profile
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from .models import Image, Profile,Comments,Likes
-from vote.managers import VotableManager
+from .forms import ProfileForm, ImageUploadForm
 
-votes=VotableManager()
+from .email import send_welcome_email
 
-@login_required(login_url='/accounts/login/')
-def index(request):
+# Create your views here.
+@login_required(login_url='/accounts/login')
+def home(request):
+    latest_pics = Image.objects.order_by('-id').select_related('profile').all()
     current_user = request.user
-    posts = Image.get_all_images()
-    comments = Comments.objects.all()
-    profile = Profile.get_all_profiles()
-    
-    
-    return render(request, 'insta/index.html', locals())
-    
-@login_required(login_url='/accounts/login/')
-def add_image(request):
-        current_user = request.user
-        if request.method == 'POST':
-                form = ImageForm(request.POST, request.FILES)
-                if form.is_valid():
-                        add=form.save(commit=False)
-                        add.user = current_user
-                        add.save()
-                return redirect('index')
-        else:
-                form = ImageForm()
-                return render(request,'insta/image.html', {"form":form})
+    profile = Profile.objects.get(user = current_user.id)
 
-@login_required(login_url='/accounts/login/')                
-def profile_info(request):
-        current_user = request.user
-        profile = Profile.objects.filter(user=current_user).first()
-        posts = request.user.image_set.all()
-       
-        return render(request, 'insta/profile.html', {"images": posts, "profile": profile})
-@login_required(login_url='/accounts/login/') 
-def profile_update(request):
-         current_user = request.user
-         if request.method == 'POST':
-                form = ProfileForm(request.POST, request.FILES)
-                if form.is_valid():
-                        add=form.save(commit=False)
-                        add.user = current_user
-                        add.save()
-                return redirect('profile')
-         else:
-                form = ProfileForm()
-         return render(request,'insta/profile_update.html',{"form":form})
+    current_user = request.user
 
-@login_required(login_url='/accounts/login/') 
-def comment(request,image_id):
-        current_user=request.user
-        image = Image.objects.get(id=image_id)
-        profile_owner = User.objects.get(username=current_user.username)
-        comments = Comments.objects.all()
-        
-        if request.method == 'POST':
-                form = CommentForm(request.POST, request.FILES)
-                if form.is_valid():
-                        comment = form.save(commit=False)
-                        comment.image = image
-                        comment.user = request.user
-                        comment.save()
+    return render(request, 'home.html', {"latest_pics": latest_pics, "current_user": current_user, "profile": profile})
+
+@login_required(login_url='/accounts/login')
+def profile(request, user_id):
+    imgs = Image.objects.filter(profile = user_id)
+    current_user = request.user
+    profile = Profile.objects.get(user = user_id)
+
+    return render(request, 'profile.html', {"current_user": current_user, "imgs": imgs, "profile": profile})
+
+@login_required(login_url='/accounts/login')
+def profile_update(request, user_id):
+
+    title = 'Update Profile'
+    profile = Profile.objects.get(user = user_id)
+
+    current_user = request.user
+
+    email = current_user.email
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            fname = form.cleaned_data['first_name']
+            lname = form.cleaned_data['last_name']
+            about = form.cleaned_data['bio']
+            mobile = form.cleaned_data['phone_number']
+            dp = form.cleaned_data['profile_photo']
+
+            # Profile.objects.filter(pk=current_user.id).save(first_name = fname, last_name = lname, email = current_user.email, bio = about, phone_number = mobile, prof_photo = dp)
+
+            # profile = Profile.objects.filter(pk=current_user.id).update(first_name = fname, last_name = lname, email = current_user.email, bio = about, phone_number = mobile, prof_photo = dp)
             
-                       
-                return redirect('index')
-        else:
-                form = CommentForm()
-        return render(request, 'insta/comment.html',locals())
+            Profile.objects.filter(user = request.user).update(first_name = fname, last_name = lname, email = current_user.email, bio = about, phone_number = mobile, prof_photo = dp)
 
+            return redirect(home)
 
-@login_required(login_url='/accounts/login/')
-def search_results(request):
-    if 'username' in request.GET and request.GET["username"]:
-        search_term = request.GET.get("username")
-        searched_users = User.objects.filter(username__icontains = search_term)
-        message = f"{search_term}"
-        profile_pic = User.objects.all()
-        return render(request, 'insta/search.html', {'message':message, 'results':searched_users, 'profile_pic':profile_pic})
     else:
-        message = "You haven't searched for any term"
-        return render(request, 'insta/search.html', {'message':message})
+        form = ProfileForm()
+    
+    return render(request, 'profile_update.html', {"ProfileForm": form, "title": title, "profile": profile})
 
-def follow(request, user_id):
-    other_user = User.objects.get(id = user_id)
-    follow = Follow.objects.add_follower(request.user, other_user)
+@login_required(login_url='/accounts/login')
+def image_uploader(request, user_id):
 
-    return redirect('index')
+    current_user = request.user
+    profile = Profile.objects.get(user = current_user.id)
 
-def unfollow(request, user_id):
-    other_user = User.objects.get(id = user_id)
-    follow = Follow.objects.remove_follower(request.user, other_user)
+    prof_user = Profile.objects.get(user=user_id)
 
-    return redirect('index')
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            img = form.cleaned_data['image']
+            i_name = form.cleaned_data['image_name']
+            i_caption = form.cleaned_data['image_caption']
+            tags = form.cleaned_data['category']
 
-@login_required(login_url='/accounts/register/')
-def like_images(request, id):
-        image = Image.get_one_image(id)
-        user = request.user
-        user_id = user.id
+            image = Image(image = img, img_name = i_name, img_caption = i_caption, profile = prof_user, likes = 0)
+            image.save()
 
-        if user.is_authenticated:
-                uplike = image.votes.up(user_id)
-                image.like_add = image.votes.count()
-                image.save()
+            # image.category.add(tags)
 
-        return redirect('index')
+            return redirect(home)
+    else:
+        form = ImageUploadForm()
+    
+    return render(request, 'image_upload.html', {"ImageUploadForm": form, "profile": profile})
+
+def likes(request, pic_id):
+    img = Image.objects.get(id = pic_id)
+    new_likes = img.likes + 1
+
+    # img.update(likes = new_likes)
+    Image.objects.filter(pk=pic_id).update(likes = new_likes)
+
+    return redirect(home)
+
+def index_test(request):
+    title = "ingram index page testpage"
+
+    return render(request, 'index.html', {"title": title})

@@ -12,9 +12,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,8 +34,10 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'insta',
-    'bootstrap5',
-    'cloudinary',
+    'bootstrap4',
+    'fontawesome_5',
+    'material',
+    'tinymce',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -91,11 +90,7 @@ DATABASES = {
     }
 }
 
-cloudinary.config( 
-    cloud_name =config('CLOUD_NAME'),
-    api_key=config('CLOUD_API_KEY'), 
-    api_secret=config('API_SECRET'),
-)
+
 
 
 # Password validation
@@ -138,7 +133,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+MEDIA_URL = '/media/'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

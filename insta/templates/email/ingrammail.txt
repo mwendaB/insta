@@ -1,0 +1,5 @@
+Hello {{name}}
+
+Welcome to Ingram. A photo is worth a thousand words.
+
+Ingram Master

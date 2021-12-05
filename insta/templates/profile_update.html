@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/profile_update.css' %}">
+{% endblock %}
+
+{% block content %}
+    {{block.super}}
+    <div class="container">
+        {% if user.is_authenticated %}
+            <form action="{% url 'profile_update' user.id %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% bootstrap_form ProfileForm %}
+                <div class="form-group text-center">
+                    <input type="submit" value="Update Profile" class="btn btn-outline-primary">
+                </div>
+            </form>
+        {% else %}
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                    <h1 class="display-3">Login To View Your Profile</h1>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
