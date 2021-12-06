@@ -1,5 +1,5 @@
 Hello {{name}}
 
-Welcome to Ingram. A photo is worth a thousand words.
+Welcome to Instagram-clone. A photo is worth a thousand words.
 
-Ingram Master
+Instagram-clone Master

@@ -1,17 +1,51 @@
 from django import forms
-from .models import Profile
+from .models import *
+from django.contrib.auth.forms import UserCreationForm
+from django.forms.widgets import Textarea
 
-class ProfileForm(forms.Form):
-    first_name = forms.CharField(label = 'First Name:', max_length=30)
-    last_name = forms.CharField(label = 'Last Name:', max_length=30, required=False)
-    bio = forms.CharField(label = "About You:", widget=forms.Textarea)
-    phone_number = forms.IntegerField(label = "Phone Number:")
-    profile_photo = forms.ImageField(label = "Profile Photo:")
+class NewsLetterForm(forms.Form):
+    your_name = forms.CharField(label='First Name',max_length=30)
+    email = forms.EmailField(label='Email')
+    
+    
+class UserRegisterForm(UserCreationForm):
+    email= forms.EmailField()
+    
+    # specify model it will interact with
+    class Meta:
+        model = User  
+        fields= ['username','email','password1','password2']
+        
+        help_texts = { 'username': None, 'password2': None, }
 
-class ImageUploadForm(forms.Form):
-    image = forms.ImageField(label = "Image:")
-    image_name = forms.CharField(label = "Image Name:", max_length=50)
-    image_caption = forms.CharField(label = "Image Caption:", max_length=300)
-    category = forms.CharField(label = "Category:", max_length=100)
 
+User._meta.get_field('email')._unique = True 
 
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ('image', 'caption')
+        
+        
+
+class CommentForm(forms.ModelForm):
+    comment = forms.CharField(label='Leave a comment',max_length=30)
+
+    class Meta:
+        model = Comments
+        fields = ('comment',)
+        
+class UpdateUserProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['profile_pic', 'bio']
+        widgets = {
+            'bio': Textarea(attrs={'cols': 20, 'rows': 5}),
+        }
+        
+class UpdateUserForm(forms.ModelForm):
+    email = forms.EmailField(max_length=300)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')

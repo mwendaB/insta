@@ -1,17 +1,14 @@
+from django.urls import path
 from django.conf.urls import url
+from django.urls.conf import re_path
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
-    url('^$', views.home, name ='home'),
-    url(r'^index/$', views.index_test, name='index'),
-    url(r'^profile/(\d+)', views.profile, name='profile'),
-    url(r'^profile_update/(\d+)', views.profile_update, name='profile_update'),
-    url(r'^image_upload/(\d+)', views.image_uploader, name='image_upload'),
-    url(r'^like/(\d+)', views.likes, name='liking'),
+    path('',views.index, name='home'),
+    path('profile/<username>/', views.profile, name='profile'),
+    path('unfollow/<to_unfollow>', views.unfollow, name='unfollow'),
+    path('follow/<to_follow>', views.follow, name='follow'),
+    path('like/<id>', views.like, name='like'),
+    path('post/<id>', views.comment, name='comment'),
+    path('user_profile/<username>/', views.user_profile, name='user_profile'),
 ]
-
-if settings.DEBUG:
-    urlpatterns+= static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

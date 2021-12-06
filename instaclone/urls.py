@@ -22,14 +22,14 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.views.static import serve
+from insta import views as insta_views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', include('insta.urls')),
-    url(r'^accounts/', include('django_registration.backends.one_step.urls')),
-    # url(r'^accounts/login/$', v.login, {"next_page": '/'}),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('img/favicon.ico'))),
-    url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
-    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
+    path('',include('insta.urls')),
+    path('tinymce /', include('tinymce.urls')),
+    path('accounts/register/',insta_views.register, name='register'),
+    path('accounts/login/',auth_views.LoginView.as_view(), name='login'),
+    path('logout/',auth_views.LogoutView.as_view(), name='logout'),
 ]
