@@ -1,4 +1,4 @@
-#!/home/moringaschool/Documents/django/instaclone/virtual/bin/python
+#!/home/moringaschool/Downloads/Compressed/the-gram-main/virtual/bin/python
 from django.core import management
 
 if __name__ == "__main__":

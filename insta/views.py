@@ -1,124 +1,180 @@
-from django.http  import HttpResponse,Http404,HttpResponseRedirect
-import datetime as dt
-from django.shortcuts import render,redirect,get_object_or_404
-from .models import Follow, Image,Profile,Comments
-from django.contrib.auth.models import User
-from .forms import NewsLetterForm, UpdateUserForm, UpdateUserProfileForm, UserRegisterForm,PostForm,CommentForm
-# from .email import send_welcome_email
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.urls import reverse
+from .models import *
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 
-def register(request):
-    if request.method=="POST":
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request,f'Account created for {username}!')
-            return redirect('login')
-            
-    else:
-        form = UserRegisterForm()
-    return render(request,"registration/register.html",{'form':form})
+# Create your views here.
 
-
+#View for homepage that displays posts
 @login_required(login_url='/accounts/login/')
 def home(request):
-    posts= Image.objects.all()
-    comments = Comments.objects.all()
-    all_users = User.objects.exclude(id=request.user.id)
+    posts = Post.objects.all()
+    return render(request, 'home.html', {'posts': posts})
+
+# profile page
+@login_required(login_url='/accounts/login/')
+def profile(request):
     current_user = request.user
-   
+    # get images for the current logged in user
+    posts = Post.objects.filter(user_id=current_user.id)
+    # get the profile of the current logged in user
+    profile = Profile.objects.filter(user_id=current_user.id).first()
+    return render(request, 'profile.html', {"posts": posts, "profile": profile})
+
+# save image  with image name,image caption and upload image to cloudinary
+@login_required(login_url='/accounts/login/')
+def new_post(request):
     if request.method == 'POST':
-        post_form = PostForm(request.POST, request.FILES)
-        if post_form.is_valid():
-            post = post_form.save(commit=False)
-            post.user = request.user
-            post.save()
-            return HttpResponseRedirect(reverse("home"))
+        image_name = request.POST['image_name']
+        image_caption = request.POST['image_caption']
+        image_file = request.FILES['image_file']
+        image_file = cloudinary.uploader.upload(image_file)
+        image_url = image_file['url']
+        # image_public_id = image_file['public_id']
+        image = Post(image_name=image_name, image_caption=image_caption, image=image_url,
+                      profile_id=request.POST['user_id'], user_id=request.POST['user_id'])
+        image.save_image()
+        return redirect('/', {'success': 'Image Uploaded Successfully'})
     else:
-        post_form = PostForm()
-  
-    return render(request, 'all-instagram/home.html',{'posts': posts,'post_form': post_form,'all_users': all_users,'comments':comments,'current_user':current_user} )
+        return render(request, 'profile.html', {'danger': 'Image Upload Failed'})
 
-
-@login_required(login_url='login')
-def profile(request, username):
-    images = request.user.images.all()
+# update profile with first name,last name,username,email and upload profile image to cloudinary
+@login_required(login_url='/accounts/login/')
+def update_profile(request):
     if request.method == 'POST':
-        user_form = UpdateUserForm(request.POST, instance=request.user)
-        profile_form = UpdateUserProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            return HttpResponseRedirect(request.path_info)
-    else:
-        user_form = UpdateUserForm(instance=request.user)
-        profile_form = UpdateUserProfileForm(instance=request.user.profile)
 
-    return render(request, 'all-instagram/profile.html', {'user_form':user_form,'profile_form':profile_form,'images':images})
+        current_user = request.user
 
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        username = request.POST['username']
+        email = request.POST['email']
 
-@login_required(login_url='login')
-def comment(request, id):
-    image = Image.objects.get(id=id)
-    # comments = Comments.get_comments_by_images(id)
-    comments = Comments.objects.all()
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.image = image
-            new_comment.user = request.user.profile
-            new_comment.save()
-            
-            return HttpResponseRedirect(request.path_info)
-            
-    else:
-        form = CommentForm()
+        bio = request.POST['bio']
 
-    return render(request, 'all-instagram/post.html', {'post': image,'form': form,'comments':comments})
+        profile_image = request.FILES['profile_pic']
+        profile_image = cloudinary.uploader.upload(profile_image)
+        profile_url = profile_image['url']
 
-@login_required(login_url='login')
-def unfollow(request, to_unfollow):
-    if request.method == 'GET':
-        unfollow_profile = Profile.objects.get(pk=to_unfollow)
-        unfollow_d = Follow.objects.filter(follower=request.user.profile, followed=unfollow_profile)
-        unfollow_d.delete()
-        return redirect('user_profile', unfollow_profile.user.username)
+        user = User.objects.get(id=current_user.id)
 
-@login_required(login_url='login')
-def follow(request, to_follow):
-    if request.method == 'GET':
-        follow_profile = Profile.objects.get(pk=to_follow)
-        follow_s = Follow(follower=request.user.profile, followed=follow_profile)
-        follow_s.save()
-        return redirect('user_profile', follow_profile.user.username)
-    
-    
-@login_required(login_url='login')
-def user_profile(request, username):
-    user_poster = get_object_or_404(User, username=username)
-    if request.user == user_poster:
-        return redirect('profile', username=request.user.username)
-    user_posts = user_poster.images.all()
-    
-    followers = Follow.objects.filter(followed=user_poster.profile)
-    if_follow = None
-    for follower in followers:
-        if request.user.profile == follower.follower:
-            if_follow = True
+        # check if user exists in profile table and if not create a new profile
+        if Profile.objects.filter(user_id=current_user.id).exists():
+            profile = Profile.objects.get(user_id=current_user.id)
+            profile.profile_photo = profile_image
+            profile.bio = bio
+            profile.save()
         else:
-            if_follow = False
+            profile = Profile(user_id=current_user.id,
+                              profile_photo=profile_url, bio=bio)
+            profile.save_profile()
 
-    print(followers)
-    return render(request, 'all-instagram/poster.html', {'user_poster': user_poster,'followers': followers, 'if_follow': if_follow,'user_posts':user_posts})
+        user.first_name = first_name
+        user.last_name = last_name
+        user.username = username
+        user.email = email
 
-@login_required(login_url='login')
-def like(request, id):
-    post = Image.objects.get(id = id)
-    post.likes += 1
-    post.save()
-    return HttpResponseRedirect(reverse("home"))
+        user.save()
+
+        return redirect('/profile', {'success': 'Profile Updated Successfully'})
+
+       
+    else:
+        return render(request, 'profile.html', {'danger': 'Profile Update Failed'})
+
+
+# like image
+@login_required(login_url='/accounts/login/')
+def like_image(request, id):
+    likes = Like.objects.filter(post_id=id).first()
+    # check if the user has already liked the image
+    if Like.objects.filter(post_id=id, user_id=request.user.id).exists():
+        # unlike the image
+        likes.delete()
+        # reduce the number of likes by 1 for the image
+        post = Post.objects.get(id=id)
+        # check if the image like_count is equal to 0
+        if post.likes == 0:
+            post.likes = 0
+            post.save()
+        else:
+            post.likes -= 1
+            post.save()
+        return redirect('/')
+    else:
+        likes = Like(post_id=id, user_id=request.user.id)
+        likes.save()
+        # increase the number of likes by 1 for the image
+        post = Post.objects.get(id=id)
+        post.likes = post.likes + 1
+        post.save()
+        return redirect('/')
+
+
+# single image page with comments
+@login_required(login_url='/accounts/login/')
+def view_post(request, id):
+    post = Post.objects.get(id=id)
+    # get related images to the image that is being viewed by the user and order them by the date they were created
+    related_posts = Post.objects.filter(
+        user_id=post.user_id)
+    title = post.image_name
+    # check if image exists
+    if Post.objects.filter(id=id).exists():
+        # get all the comments for the image
+        comments = Comment.objects.filter(post_id=id)
+        return render(request, 'picture.html', {'post': post, 'comments': comments, 'posts': related_posts, 'title': title})
+    else:
+        return redirect('/')
+
+
+# save comment
+@login_required(login_url='/accounts/login/')
+def add_comment(request):
+    if request.method == 'POST':
+        comment = request.POST['comment']
+        post_id = request.POST['post_id']
+        post = Post.objects.get(id=post_id)
+        user = request.user
+        comment = Comment(comment=comment, post_id=post_id, user_id=user.id)
+        comment.save_comment()
+        # increase the number of comments by 1 for the image
+        post.comments = post.comments + 1
+        post.save()
+        return redirect('/picture/' + str(post_id))
+    else:
+        return redirect('/')
+
+
+# user profile page with images
+@login_required(login_url='/accounts/login/')
+def user_profile(request, id):
+    # check if user exists
+    if User.objects.filter(id=id).exists():
+        # get the user
+        user = User.objects.get(id=id)
+        # get all the images for the user
+        posts = Post.objects.filter(user_id=id)
+        # get the profile of the user
+        profile = Profile.objects.filter(user_id=id).first()
+        return render(request, 'user-profile.html', {'posts': posts, 'profile': profile, 'user': user})
+    else:
+        return redirect('/')
+
+
+# search for images
+@login_required(login_url='/accounts/login/')
+def search_posts(request):
+    if 'search' in request.GET and request.GET['search']:
+        search_term = request.GET.get('search').lower()
+        posts = Post.search_by_image_name(search_term)
+        message = f'{search_term}'
+        title = message
+
+        return render(request, 'search.html', {'success': message, 'posts': posts})
+    else:
+        message = 'You havent searched for any term'
+        return render(request, 'search.html', {'danger': message})

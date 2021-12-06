@@ -1,38 +1,42 @@
-{% load bootstrap4 %}
-{% load fontawesome_5 %}
+{% load bootstrap5 %}
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% if title %}
-        <title>{{ title }}</title>
-    {% else %}
-        <title>Instagram</title>
-    {% endif %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {% fontawesome_5_static %}
-    
-    {% block styles %}
-        {% bootstrap_css %}
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    {% endblock %}
+
+  {%if title%}
+
+  <title>{{title}}</title>
+
+  {%endif%}
+  <link rel="icon" type="image/png" href="{%static 'icons/instragam.svg'%}" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  {% block styles %}
+  {% bootstrap_css %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% endblock %}
+
 </head>
+
 <body>
-    {% include "navbar.html" %}
 
-    {% block content %}
+  {%include "navbar.html"%}
 
-    {% endblock %}
-    
-    {% block scripts %}
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  {% block content %} {%endblock%}
 
-        {% bootstrap_javascript %}
-    {% endblock %}
+
+  {% block scripts %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  {% bootstrap_javascript %}
+  {% endblock %}
+
 </body>
+
 </html>

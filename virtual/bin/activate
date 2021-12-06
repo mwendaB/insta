@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/moringaschool/Documents/django/instaclone/virtual"
+VIRTUAL_ENV="/home/moringaschool/Downloads/Compressed/the-gram-main/virtual"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

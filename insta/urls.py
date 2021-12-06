@@ -1,14 +1,27 @@
+'''
+Module that defines application paths
+'''
 from django.urls import path
-from django.conf.urls import url
-from django.urls.conf import re_path
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 
+
 urlpatterns = [
-    path('',views.index, name='home'),
-    path('profile/<username>/', views.profile, name='profile'),
-    path('unfollow/<to_unfollow>', views.unfollow, name='unfollow'),
-    path('follow/<to_follow>', views.follow, name='follow'),
-    path('like/<id>', views.like, name='like'),
-    path('post/<id>', views.comment, name='comment'),
-    path('user_profile/<username>/', views.user_profile, name='user_profile'),
+    path('', views.home, name='home'),
+    path('profile/', views.profile, name='profile'),
+    path('upload/add/', views.new_post, name='save.image'),
+
+
+    path('profile/update/', views.update_profile, name='update.profile'),
+    path('like/<int:id>/', views.like_image, name='like.image'),
+    path('picture/<int:id>/', views.view_post, name='single.image'),
+    path('comment/add', views.add_comment, name='comment.add'),
+
+    path('user/<int:id>/', views.user_profile, name='user.profile'),
+    path('search/', views.search_posts, name='search.images'),
+
 ]
+
+if settings.DEBUG:
+    urlpatterns+= static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
