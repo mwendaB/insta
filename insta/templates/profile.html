@@ -1,55 +1,58 @@
-{% extends 'base.html' %}
+{%extends 'base.html'%}
+{% load bootstrap4 %}
 {% load static %}
+{% block content %} 
+{{ block.super}}
 
-{% block styles %}
-    <link rel="stylesheet" href="{% static 'css/profile.css'%}">
-{% endblock %}
-
-{% block content %}
-    {{block.super}}
-    <div class="container">
-        {% if profile.prof_photo %}
-            <div class="profile-part">
-                <div class="profile-image">
-                    <div class="the-profile-image">
-                        <img src="{{ MEDIA_URL }}/pics/profiles/{{ profile.prof_photo }}" alt="Profile Photo">
+    <div class="container mt-3">
+        <div class="content-section">
+            <div class="media">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-3">
+                            <img class="rounded-circle" src="{{ user.profile.profile_pic.url }}" height="150px" width="150px">
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="media-body">
+                                <div class=""><span class="font-weight-bold name">{{ user.username }}</span>
+                                    <a class="btn btn-sm btn-outline-secondary ml-3 mr-3" data-toggle="modal" data-target=".bd-example-modal-md"><strong>Edit Profile</strong></a>
+                                </div>
+    
+                                <div class="post-details mt-3 mb-3">
+                                    <span class="mr-5"><strong>{{images.count}}</strong> Posts</span>
+                                    <span class="mr-5"> <strong>{{ user.profile.followers.count }}</strong> followers</span>
+                                    <span class="mr-5"> <strong>{{ user.profile.following.count }}</strong> following</span>
+                                </div>
+                                <h5>{{ user.profile.name }}</h5>
+                                <p class="text-secondary">{{ user.profile.bio }}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="the-profile-name text-center">
-                        <i>{{ current_user.username }}</i>
-                    </div>
-                </div>
-                <div class="profile-details">
-                    <table>
-                        <tr>
-                            <td class="t-right"><i class="fas fa-user"></i></td>
-                            <td class="t-left">{{ profile.first_name }} {{ profile.last_name }}</td>
-                        </tr>
-                        <tr>
-                            <td class="t-right"><i class="fas fa-phone"></i></td>
-                            <td class="t-left">{{ profile.phone_number }}</td>
-                        </tr>
-                        <tr>
-                            <td class="t-right"><i class="fas fa-envelope"></i></td>
-                            <td class="t-left">{{ current_user.email }}</td>
-                        </tr>
-                        <tr>
-                            <td class="t-right"><i class="fas fa-address-card"></i></td>
-                            <td class="t-left t-bio">{{ profile.bio }}</td>
-                        </tr>
-                    </table>
                 </div>
             </div>
-            <hr>
-            <div class="container-fluid"></div>
-        {% else %}
-            <div class="jumbotron m-5">
-                <h1 class="display-3">Hello, {{ current_user.username }}</h1>
-                <p class="lead">Please fill in your profile details to view your profile</p>
-                <hr class="my-2">
-                <p>
-                    <a class="btn btn-primary btn-lg" href="{% url 'profile_update' user.id %}" role="button">Update Profile</a>
-                </p>
+            <div class="modal fade bd-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-md ">
+                    <div class="modal-content">
+                        <form action="" method="post" enctype="multipart/form-data" class="mr-4 mt-4 ml-4 mb-4">
+                            {% csrf_token%}
+                            {{ user_form}}
+                            {{ profile_form}}
+                            <button type="submit" class="btn btn-info btn-sm login"> Update Profile</button>
+                        </form>
+                    </div>
                 </div>
-        {% endif %}
+            </div>
+        </div>
+        <hr class="mt-4">
+            <div class="row">
+            {% for image in images %}                
+                <div class="col-sm-8 col-lg-3 mb-3 imgdisplay">
+                    <img src="{{image.image.url}}" alt=" " class="card-img photo" height="200">
+                    
+                </div>            
+            {% endfor %}
+        </div>
     </div>
-{% endblock %}
+
+{%endblock%}

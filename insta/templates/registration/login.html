@@ -1,35 +1,37 @@
-{% extends "registration/base.html" %}
+{%extends "registration/base.html"%}
 {% load bootstrap4 %}
+{% load crispy_forms_tags%}
+{%load static%}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col"></div>
-            <div class="col-6">
-                {% if form.errors %}
-                    <p>Password or username is incorrect</p>
-                {% endif %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="text-center">Sign In</h3>
-                    </div>
-                    <div class="panel-body">
-                        <form action="/accounts/login/" method="POST">
-                            {% csrf_token %}
-                            {% bootstrap_form form %}
-
-                            <div class="form-group">
-                                <p>Don't have an account? Register <a href="/accounts/register/">Here</a></p>
-                            </div>
-
-                            <div class="form-group">
-                                <input type="submit" class="btn btn-primary btn-sm" value="Login">
-                            </div>
-                            <input type="hidden" name="next" value="{{ next }}">
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col"></div>
+<div class="container mt-5">
+  <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-4 slide-holder">
+        <div class="slider">               
         </div>
-    </div>
+          <img src="{% static 'photos/instagram.jpg' %}"  alt=""  width="100%" height="100%" id="logo1">
+      </div>
+      
+      <div class="col-md-4 col-sm-8 mt-4">
+          <div class="card pb-1">
+              <div class="card-title mt-4">
+                  <img src="{% static 'photos/logo1.png' %}" alt="" width="40%" class="logo">
+              </div>
+              <div class="card-body pb-1 mr-3 ml-3">
+                  <form action="" method="post" novalidate>
+                      {% csrf_token%}
+                      {{ form|crispy}}
+                      <button type="submit" class="btn btn-primary btn-sm login"> Log In</button>
+                  </form>
+                  <p class="text-muted mt-3 text-center">---------------------  OR   ---------------------</p>
+                  <small class="text-muted"> Don't have an account? <a href="{%url 'register'%}">Sign up</a></small>                 
+              </div>
+              <small class="text-center mb-2 mt-1 ml-2"><a href="" class="text-center pb-3">Forgot password? </a></small>
+              
+          </div>
+      </div>
+      <div class="col-md-2"></div>
+  </div>
+</div>
+
 {% endblock %}
