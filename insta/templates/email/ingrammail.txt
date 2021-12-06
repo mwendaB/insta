@@ -1,0 +1,5 @@
+Hello {{name}}
+
+Welcome to Instagram-clone. A photo is worth a thousand words.
+
+Instagram-clone Master
