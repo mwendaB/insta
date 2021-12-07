@@ -26,11 +26,9 @@ To get the project .......
  ```bash 
 https://github.com/mwendaB/insta
 ```
-##### Navigate in## Prerequisites
-* Python3.6to the folder and install requirements  
- ```bash 
-cd the-gram pip install -r requirements.txt 
-```
+
+cd insta
+
 ##### Install and activate Virtual  
  ```bash 
 - python3 -m venv virtual - source virtual/bin/activate  
